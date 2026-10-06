@@ -73,10 +73,9 @@ swipe itself needs a physical touchpad.
 ## Install
 
 ```bash
-~/.local/share/three-finger-gestures/install.sh              # install + verify
-~/.local/share/three-finger-gestures/install.sh --verify     # verify only
-~/.local/share/three-finger-gestures/install.sh --uninstall  # remove the service
-~/.local/share/three-finger-gestures/install.sh --purge      # ...and the sources
+# from a clone, or from the installed source dir (~/.local/share/three-finger-gestures)
+./install.sh              # install or reinstall, then verify
+./install.sh --verify     # verify only, changes nothing
 ```
 
 Idempotent. It writes the systemd **user** unit with `ExecStart` derived from its own
@@ -84,6 +83,28 @@ location — never a hardcoded path, so it cannot end up pointing at a stale cop
 `ydotoold`, then verifies: unit active, enabled at login, `ydotoold` running, the daemon
 holding a `/dev/input/event*` fd, no unregistered action names, and the self-check passing.
 Any failure is reported by name and the script exits non-zero.
+
+## Uninstall
+
+```bash
+./install.sh --uninstall  # stop and remove the service, keep the sources
+./install.sh --purge      # ...and delete the source directory
+```
+
+No root needed; both stop the service immediately rather than at next login. Note that
+`--purge` deletes the directory the script is running from — which is the clone, if that is
+where you ran it.
+
+If the sources are already gone, remove the service by hand:
+
+```bash
+systemctl --user disable --now three-finger-gestures
+rm -f ~/.config/systemd/user/three-finger-gestures.service
+systemctl --user daemon-reload
+```
+
+`ydotoold` is deliberately left running either way, since other tools may use it.
+`systemctl --user disable --now ydotool` removes that too.
 
 ## Gotchas
 
