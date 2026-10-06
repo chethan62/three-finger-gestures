@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # three-finger-gestures -- install / uninstall with verification.
 #
+#   curl -fsSL https://raw.githubusercontent.com/chethan62/three-finger-gestures/main/install.sh | bash
+#
 #   ./install.sh              install or reinstall, then verify
 #   ./install.sh --verify     verification only (changes nothing)
 #   ./install.sh --uninstall  stop and remove the systemd unit
@@ -11,17 +13,39 @@
 # never point at a stale copy.
 set -euo pipefail
 
-SRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# Piped to bash there is no BASH_SOURCE (and `set -u` would make reading it an
+# error), and no sources beside us either. Fall back to the cwd; fetch_sources()
+# below notices the daemon is missing and fixes both.
+SRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-}")" 2>/dev/null && pwd)"
 DAEMON="$SRC/three-finger-gestures.py"
 TEST="$SRC/test-three-finger-gestures.py"
 SVC=three-finger-gestures
 UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 UNIT="$UNIT_DIR/$SVC.service"
 PY=/usr/bin/python3
+DEST="${TFG_DEST:-$HOME/.local/share/$SVC}"
+REPO=https://github.com/chethan62/$SVC.git
 
 ok()  { printf '  ok    %s\n' "$*"; }
 bad() { printf '  FAIL  %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 2; }
+
+# One-command install: with no sources beside this script, fetch them and re-exec
+# from the checkout so everything downstream behaves identically.
+fetch_sources() {
+  command -v git >/dev/null || die "git not found (needed to fetch the sources)"
+  if [[ -e $DEST && ! -d $DEST/.git ]]; then
+    die "$DEST exists and is not a git checkout -- move it aside, or set TFG_DEST"
+  fi
+  if [[ -d $DEST/.git ]]; then
+    ok "updating $DEST"
+    git -C "$DEST" pull --ff-only >/dev/null
+  else
+    ok "fetching sources into $DEST"
+    git clone --depth 1 "$REPO" "$DEST" >/dev/null
+  fi
+  exec "$DEST/install.sh" "${1:-install}"
+}
 
 preflight() {
   [[ -x $PY ]]                 || die "python3 not found at $PY"
@@ -107,10 +131,22 @@ do_uninstall() {
   fi
 }
 
+# --uninstall/--purge need no sources, so only the other actions trigger a fetch.
+if [[ ! -f $DAEMON ]]; then
+  case "${1:-install}" in
+    --uninstall|--purge) ;;
+    *) fetch_sources "${1:-install}" ;;
+  esac
+fi
+
 case "${1:-install}" in
   install)     do_install ;;
   --verify)    echo "verifying:"; verify ;;
   --uninstall) do_uninstall ;;
-  --purge)     do_uninstall --purge ;;
+  --purge)
+    # Checked before anything is touched: piped to bash $SRC is the cwd, and
+    # rm -rf'ing that would be a nasty surprise. Refuse rather than half-uninstall.
+    [[ -f $DAEMON ]] || die "refusing to purge $SRC -- no daemon there; run --purge from the installed source dir"
+    do_uninstall --purge ;;
   *)           die "usage: $0 [install|--verify|--uninstall|--purge]" ;;
 esac

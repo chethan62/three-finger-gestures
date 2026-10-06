@@ -72,8 +72,15 @@ swipe itself needs a physical touchpad.
 
 ## Install
 
+One command — fetches the sources into `~/.local/share/three-finger-gestures` and installs:
+
 ```bash
-# from a clone, or from the installed source dir (~/.local/share/three-finger-gestures)
+curl -fsSL https://raw.githubusercontent.com/chethan62/three-finger-gestures/main/install.sh | bash
+```
+
+Or from a clone, or from the installed source dir:
+
+```bash
 ./install.sh              # install or reinstall, then verify
 ./install.sh --verify     # verify only, changes nothing
 ```
