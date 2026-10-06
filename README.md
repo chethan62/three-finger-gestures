@@ -6,6 +6,8 @@ KWin leaves unbound by reading the touchpad directly and driving KWin — **no r
 libinput CLI, and no third-party daemon beyond `ydotool` for the one case KWin exposes
 no action for.
 
+![Map of the four three-finger swipes, each driving a KWin action — and the same four directions stepping the Overview grid selection while it is open](assets/gestures.png)
+
 Three fingers, and the Overview selection moves *with* your fingers.
 
 ## What it adds, and what KWin already owns
