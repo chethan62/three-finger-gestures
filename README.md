@@ -27,6 +27,14 @@ Read from KWin's source, not folklore:
 Mapping a direction KWin already owns means both actors fire on one swipe and the result
 is a stutter (an open/close flicker). That is why the table is split this way.
 
+## What it looks like
+
+![KWin's Overview with the three-finger selection outline on a window — placeholder windows, see the note below](assets/overview.jpg)
+
+The blue outline is the Overview's selection — the thing the three-finger swipes move. The
+windows are placeholders on purpose: the Overview renders live thumbnails of every open
+window, so a capture of a real desktop would publish whatever happened to be on it.
+
 ## Measured on
 
 - CachyOS, Plasma **6.7.5**, KWin **6.7.5**, Wayland session
