@@ -29,11 +29,13 @@ is a stutter (an open/close flicker). That is why the table is split this way.
 
 ## What it looks like
 
-![KWin's Overview with the three-finger selection outline on a window — placeholder windows, see the note below](assets/overview.jpg)
+![KWin's Overview, with the three-finger swipes stepping the selection across the window grid — placeholder windows, see the note below](assets/overview.gif)
 
 The blue outline is the Overview's selection — the thing the three-finger swipes move. The
 windows are placeholders on purpose: the Overview renders live thumbnails of every open
-window, so a capture of a real desktop would publish whatever happened to be on it.
+window, so a capture of a real desktop would publish whatever happened to be on it. The
+stepping is driven through the same key injection the daemon uses for the Overview; the
+swipe itself needs a physical touchpad.
 
 ## Measured on
 
